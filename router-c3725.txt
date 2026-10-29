@@ -1,0 +1,83 @@
+version 12.4
+service timestamps debug datetime msec
+service timestamps log datetime msec
+no service password-encryption
+!
+hostname Router
+!
+boot-start-marker
+boot-end-marker
+!
+no logging console
+!
+no aaa new-model
+memory-size iomem 5
+ip cef
+!
+no ip dhcp use vrf connected
+ip dhcp excluded-address 192.168.10.1 192.168.10.20
+ip dhcp excluded-address 192.168.20.1 192.168.20.20
+!
+ip dhcp pool vlan10
+ network 192.168.10.0 255.255.255.0
+ dns-server 8.8.8.8
+ domain-name wr
+ default-router 192.168.10.1
+!
+ip dhcp pool vlan20
+ network 192.168.20.0 255.255.255.0
+ default-router 192.168.20.1
+ dns-server 8.8.8.8
+ domain-name wr
+!
+multilink bundle-name authenticated
+!
+archive
+ log config
+  hidekeys
+!
+interface FastEthernet0/0
+ ip address 10.0.0.1 255.255.255.252
+ duplex auto
+ speed auto
+!
+interface FastEthernet0/1
+ no ip address
+ speed 100
+ full-duplex
+!
+interface FastEthernet0/1.10
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+!
+interface FastEthernet0/1.20
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip access-group guest-in in
+!
+router ospf 1
+ router-id 1.1.1.1
+ log-adjacency-changes
+ passive-interface FastEthernet0/1.10
+ passive-interface FastEthernet0/1.20
+ network 10.0.0.0 0.0.0.3 area 0
+ network 192.168.10.0 0.0.0.255 area 0
+ network 192.168.20.0 0.0.0.255 area 0
+!
+ip forward-protocol nd
+!
+ip http server
+no ip http secure-server
+!
+ip access-list extended guest-in
+ deny   ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+ permit ip any any
+!
+control-plane
+!
+line con 0
+ logging synchronous
+line aux 0
+line vty 0 4
+!
+end
