@@ -70,7 +70,13 @@ From a VPC:
 ping 8.8.8.8
 ```
 
-The ping replies once the OSPF neighbor is up.
+## Screenshots
+
+| File | What it shows |
+|---|---|
+| `screenshots/ospf-neighbor.png` | Router sees the FortiGate (2.2.2.2) as FULL |
+| `screenshots/ip-route.png` | Default route learned through OSPF, with its age |
+| `screenshots/ping-8.8.8.8.png` | VPC reaching the internet |
 
 ## Problems I ran into
 
@@ -86,7 +92,9 @@ What I checked:
 - The router sent a hello every 10 seconds, but its debug showed no hello received from 10.0.0.2 while the neighbor was down.
 - The FortiGate saw the router as Init, and for a while both sides thought they were the DR.
 
-After turning the debug on and off, the neighbor came up as FULL with a consistent DR and BDR. I did not find a confirmed root cause. Possible causes are the FortiGate VM being slow inside PNETLab or multicast not passing reliably on the virtual link. Next thing to try is `ip ospf network point-to-point` on both ends.
+After I turned the OSPF debug on and off on the FortiGate, the neighbor came up as FULL with a consistent DR and BDR. The default route learned through OSPF then stayed up for over 15 minutes, so the neighbor has been stable since.
+
+I could not confirm the root cause. The config matched on both sides, so I suspect the FortiGate VM was slow or the virtual link in PNETLab was losing multicast hellos for a while. If it comes back, the next test is `ip ospf network point-to-point` on both ends.
 
 ## Files
 
@@ -94,6 +102,7 @@ After turning the debug on and off, the neighbor came up as FULL with a consiste
 - `configs/switch.txt`: relevant parts of the switch config and `show vlan brief`
 - `configs/fortigate.txt`: interfaces, OSPF, static route and firewall policy
 - `topology.png`: lab diagram
+- `screenshots/`: verification output
 
 ## Skills practiced
 
