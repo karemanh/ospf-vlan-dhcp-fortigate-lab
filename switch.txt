@@ -1,0 +1,31 @@
+# Switch (IOS-L2 on PNETLab)
+# e0/0 -> VPC1 (VLAN 10), e0/1 -> VPC2 (VLAN 20), e0/2 -> trunk to C3725 fa0/1
+
+# show running-config (relevant parts)
+spanning-tree mode pvst
+spanning-tree extend system-id
+!
+interface Ethernet0/0
+ switchport access vlan 10
+ switchport mode access
+!
+interface Ethernet0/1
+ switchport access vlan 20
+ switchport mode access
+!
+interface Ethernet0/2
+ switchport trunk encapsulation dot1q
+ switchport mode trunk
+ switchport nonegotiate
+ duplex full
+!
+interface Ethernet0/3
+!
+end
+
+# show vlan brief
+VLAN Name                             Status    Ports
+---- -------------------------------- --------- -------------------------------
+1    default                          active    Et0/3
+10   VLAN0010                         active    Et0/0
+20   guest                            active    Et0/1
