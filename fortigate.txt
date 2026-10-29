@@ -1,0 +1,65 @@
+# FortiGate-VM64-KVM
+# OSPF + VLAN + DHCP lab (PNETLab)
+# Links: port1 <-> C3725 fa0/0 (10.0.0.0/30), port2 -> Internet (Net cloud)
+
+# show system interface (relevant interfaces only)
+config system interface
+    edit "port1"
+        set vdom "root"
+        set ip 10.0.0.2 255.255.255.252
+        set allowaccess ping
+        set type physical
+        set alias "wan"
+    next
+    edit "port2"
+        set vdom "root"
+        set mode dhcp
+        set allowaccess ping
+        set type physical
+        set alias "LAN"
+        set role lan
+    next
+end
+
+# show router ospf
+config router ospf
+    set default-information-originate enable
+    set router-id 2.2.2.2
+    config area
+        edit 0.0.0.0
+        next
+    end
+    config ospf-interface
+        edit "port1"
+            set interface "port1"
+        next
+    end
+    config network
+        edit 1
+            set prefix 10.0.0.0 255.255.255.252
+        next
+    end
+end
+
+# show router static
+config router static
+    edit 3
+        set gateway 192.168.98.2
+        set device "port2"
+    next
+end
+
+# show firewall policy
+config firewall policy
+    edit 1
+        set name "lan-internet"
+        set srcintf "port1"
+        set dstintf "port2"
+        set action accept
+        set srcaddr "all"
+        set dstaddr "all"
+        set schedule "always"
+        set service "ALL"
+        set nat enable
+    next
+end
